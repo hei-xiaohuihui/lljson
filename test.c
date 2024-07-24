@@ -6,6 +6,8 @@
 #include <crtdbg.h>
 #endif // _WINDOWS
 
+// git test.c²âÊÔ
+
 /*
 	µ¥Ôª²âÊÔ¿ò¼Ü
 */
