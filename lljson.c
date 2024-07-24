@@ -313,7 +313,7 @@ static int lljson_parse_array(lljson_context* c, lljson_value* v) {
 		}
 		// 解析成功一个元素就入栈，并将size++
 		memcpy(lljson_context_push(c, sizeof(lljson_value)), &e, sizeof(lljson_value));
-		size++; // 数组元素个数统计/栈内元素个数+1 
+		size++; // 数组元素个数统计/栈内元素个数+1
 		//printf("%Iu\n", size);
 		lljson_parse_whitespace(c); /* ["abc"  ,[1,2],3] */
 		if (*c->json == ',') { 

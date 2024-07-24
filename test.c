@@ -259,7 +259,7 @@ static void test_parse_array() {
 	lljson_free(&v);
 
 	v.type = LLJSON_NULL;
-	EXPECT_EQ_INT(LLJSON_PARSE_OK, lljson_parse(&v, "[ null , false , true , 123 , \"abc\" ]"));  
+	EXPECT_EQ_INT(LLJSON_PARSE_OK, lljson_parse(&v, "[ null , false , true , 123 , \"abc\" ]")); 
 	EXPECT_EQ_INT(LLJSON_ARRAY, lljson_get_type(&v));
 	EXPECT_EQ_SIZE_T(5, lljson_get_array_size(&v));
 

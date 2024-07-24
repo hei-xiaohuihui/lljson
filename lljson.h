@@ -12,7 +12,7 @@ typedef enum { LLJSON_NULL, LLJSON_FALSE, LLJSON_TRUE, LLJSON_NUMBER,
 
 // JSON字符串是一个树形结构，使用结构体lljson_value定义该树的节点
 // 因为lljson_value中使用了自身类型的指针，所以必须前向声明此类型
-typedef struct lljson_value lljson_value;  
+typedef struct lljson_value lljson_value; 
 struct lljson_value{
 	/* 一个值不可能同时为数字、字符串或数组，因此使用union来节省内存 */
 	union {
