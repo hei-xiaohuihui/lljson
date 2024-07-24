@@ -3,6 +3,8 @@
 #ifndef LLJSON_H__
 #define LLJSON_H__
 
+// git测试lljson.h
+
 // c语言中枚举值用全大写，而类型和函数用小写
 
 // JSON中有空值 boolean值（这里分为true和false） 数值 字符串 数组 对象6中数据类型
