@@ -3,8 +3,6 @@
 #include <crtdbg.h>
 #endif // _WINDOWS
 
-// git lljson.c测试
-
 #include "lljson.h"
 #include <assert.h> // 使用c语言中的防御性编程方式断言assert
 #include <stdlib.h> // strtod() NULL
