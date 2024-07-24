@@ -270,10 +270,9 @@ static void test_parse_array() {
 	EXPECT_EQ_INT(LLJSON_STRING, lljson_get_type(lljson_get_array_element(&v, 4)));
 	EXPECT_EQ_DOUBLE(123.0, lljson_get_number(lljson_get_array_element(&v, 3)));
 	EXPECT_EQ_STRING("abc", lljson_get_string(lljson_get_array_element(&v, 4)), lljson_get_string_length(lljson_get_array_element(&v, 4))); // 之前报错，突然正常了
-	//lljson_free(&v);
+	lljson_free(&v);
 
-	/* TODO */
-	/*v.type = LLJSON_NULL;
+	v.type = LLJSON_NULL;
 	EXPECT_EQ_INT(LLJSON_PARSE_OK, lljson_parse(&v, "[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]"));
 	EXPECT_EQ_INT(LLJSON_ARRAY, lljson_get_type(&v));
 	EXPECT_EQ_SIZE_T(4, lljson_get_array_size(&v));
@@ -287,7 +286,7 @@ static void test_parse_array() {
 			EXPECT_EQ_DOUBLE((double)j, lljson_get_number(e));
 		}
 	}
-	lljson_free(&v);*/
+	lljson_free(&v);
 }
 
 
