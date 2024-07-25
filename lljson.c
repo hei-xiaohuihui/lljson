@@ -356,6 +356,40 @@ static int lljson_parse_array(lljson_context* c, lljson_value* v) {
 	return ret;
 }
 
+// 解析对象类型（JSON中的另一种复合类型）
+static int lljson_parse_object(lljson_context* c, lljson_value* v) {
+	size_t size = 0; // 记录对象中成员的个数
+	int ret; // 记录解析结果
+	EXPECT(c, '{');
+	lljson_parse_whitespace(c);
+	if (*c->json == '}') { // 正常结束
+		c->json++;
+		v->type = LLJSON_OBJECT;
+		v->u.object.size = 0;
+		v->u.object.m = NULL;
+		return LLJSON_PARSE_OK;
+	}
+	while (1) {
+		lljson_object_member m; // 临时存储解析出的成员
+		m.key.k = NULL;
+		m.value.type = LLJSON_NULL;
+		/* TODO */
+
+
+		if ((ret = (lljson_parse_value(c, &m.value))) != LLJSON_PARSE_OK) { // 解析第一个成员的value
+			// 解析失败，先break，释放内存后再返回
+			break;
+		}
+		// 解析成功一个就存入堆栈中
+		memcpy(lljson_context_push(c, sizeof(lljson_object_member)), &m, sizeof(lljson_object_member));
+		size++; // 成员个数+1
+	}
+	// 解析失败时释放内存
+	/* TODO */
+
+	return ret;
+}
+
 // 继续解析处理完空白符后的JSON字符串，并返回解析结果
 static int lljson_parse_value(lljson_context* c, lljson_value* v) {
 	//return lljson_parse_true(c, v);
@@ -366,6 +400,7 @@ static int lljson_parse_value(lljson_context* c, lljson_value* v) {
 		case 'f': return lljson_parse_literal(c, v, "false", LLJSON_FALSE);
 		case '\"': return lljson_parse_string(c, v); // 解析字符串类型
 		case '[': return lljson_parse_array(c, v); // 解析数组类型
+		case '{': return lljson_parse_object(c, v); // 解析对象类型
 		case '\0': return LLJSON_PARSE_EXPECT_VALUE;
 		// 数值的情况（且lljson_parse_number函数负责处理所有非法输入）
 		default: return lljson_parse_number(c, v); 
