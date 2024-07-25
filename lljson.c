@@ -547,3 +547,28 @@ lljson_value* lljson_get_array_element(const lljson_value* v, size_t index) {
 	assert(v != NULL && v->type == LLJSON_ARRAY && index < v->u.array.size);
 	return &v->u.array.e[index];
 }
+
+// get对象中的成员个数
+size_t lljson_get_object_size(const lljson_value* v)
+{
+	assert(v != NULL && v->type == LLJSON_OBJECT);
+	return v->u.object.size;
+}
+
+// get对象中下标index处成员的键key -> 字符串类型
+const char* lljson_get_object_key(const lljson_value* v, size_t index) {
+	assert(v != NULL && v->type == LLJSON_OBJECT && index < v->u.object.size);
+	return v->u.object.m[index].key.k;
+}
+
+// get对象中下标index处成员的键key长度
+size_t lljson_get_object_key_length(const lljson_value* v, size_t index) {
+	assert(v != NULL && v->type == LLJSON_OBJECT && index < v->u.object.size);
+	return v->u.object.m[index].key.len;
+}
+
+// get对象中下标index处成员的值value
+lljson_value* lljson_get_object_value(const lljson_value* v, size_t index) {
+	assert(v != NULL && v->type == LLJSON_OBJECT && index < v->u.object.size);
+	return &v->u.object.m[index].value;
+}

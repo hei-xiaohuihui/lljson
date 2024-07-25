@@ -91,10 +91,11 @@ size_t lljson_get_array_size(const lljson_value* v); // get 数组大小
 lljson_value* lljson_get_array_element(const lljson_value* v, size_t index); // 获取数组下标index处的元素
 
 // object类型 - > 一种无序的键值对集合，以{开始，}结束，键与值之间使用:分割
-size_t lljson_get_object_size(); // get对象中的成员个数
+size_t lljson_get_object_size(const lljson_value* v); // get对象中的成员个数
 // object类型的键key必须是字符串类型，而值可以是JSON中的任意类型
-const char* lljson_get_object_key(); // get key
-lljson_value* lljson_get_object_value(); // get value
+const char* lljson_get_object_key(const lljson_value* v, size_t index); // get key
+size_t lljson_get_object_key_length(const lljson_value* v, size_t index); // get key's length
+lljson_value* lljson_get_object_value(const lljson_value* v, size_t index); // get value
 
 #endif
 
