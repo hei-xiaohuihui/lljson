@@ -364,7 +364,7 @@ static int lljson_parse_object(lljson_context* c, lljson_value* v) {
 	size_t size = 0; // 记录对象中成员的个数
 	int ret; // 记录解析结果
 	lljson_object_member m; // 临时存储解析出的成员
-	printf("%s\n", c->json);
+	//printf("%s\n", c->json);
 	EXPECT(c, '{');
 	lljson_parse_whitespace(c);
 	if (*c->json == '}') { // 正常结束
@@ -394,6 +394,8 @@ static int lljson_parse_object(lljson_context* c, lljson_value* v) {
 		memcpy(m.key.k, sv.u.string.s, sv.u.string.len);
 		m.key.len = sv.u.string.len;
 		m.key.k[m.key.len] = '\0';
+		/* 释放临时存储键key的sv */
+		lljson_free(&sv);
 		/* 处理空格 */
 		lljson_parse_whitespace(c);
 		/* 处理冒号 */
@@ -411,7 +413,7 @@ static int lljson_parse_object(lljson_context* c, lljson_value* v) {
 		// 解析成功一个就存入堆栈中
 		memcpy(lljson_context_push(c, sizeof(lljson_object_member)), &m, sizeof(lljson_object_member));
 		size++; // 成员个数+1
-		m.key.k = NULL; /* <- */
+		m.key.k = NULL; /* 键key的字符串拥有权已转移至栈 */
 		/* 处理逗号 */
 		lljson_parse_whitespace(c); // 处理值value后的空格
 		if (*c->json == ',') {
@@ -432,8 +434,7 @@ static int lljson_parse_object(lljson_context* c, lljson_value* v) {
 		}
 	}
 	// 解析失败时释放内存
-	/* TODO */
-	free(m.key.k); /* <- */
+	free(m.key.k); /* 遇到错误时，释放临时的key字符串 */
 	for (size_t i = 0; i < size; i++) {
 		/* TODO */
 		lljson_object_member* m = (lljson_object_member*)lljson_context_pop(c, sizeof(lljson_object_member));
@@ -509,7 +510,7 @@ void lljson_free(lljson_value* v) {
 		case LLJSON_OBJECT:
 			for (size_t i = 0; i < v->u.object.size; i++) {
 				// object中的每个member可能又是一个object类型，所以递归释放
-				lljson_free(&v->u.object.m[i]);
+				lljson_free(&v->u.object.m[i].value);
 			}
 			free(v->u.object.m);
 			break;
