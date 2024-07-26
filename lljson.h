@@ -7,8 +7,15 @@
 
 // JSON中有空值 boolean值（这里分为true和false） 数值 字符串 数组 对象6中数据类型
 // 为json中的数据类型定义一个枚举类
-typedef enum { LLJSON_NULL, LLJSON_FALSE, LLJSON_TRUE, LLJSON_NUMBER, 
-	LLJSON_STRING, LLJSON_ARRAY, LLJSON_OBJECT} lljson_type;
+typedef enum {	
+	LLJSON_NULL = 0, 
+	LLJSON_FALSE = 1, 
+	LLJSON_TRUE = 2, 
+	LLJSON_NUMBER = 3, 
+	LLJSON_STRING = 4, 
+	LLJSON_ARRAY = 5, 
+	LLJSON_OBJECT = 6
+} lljson_type;
 
 // JSON字符串是一个树形结构，使用结构体lljson_value定义该树的节点
 // 因为lljson_value中使用了自身类型的指针，所以必须前向声明此类型
