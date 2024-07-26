@@ -364,7 +364,7 @@ static int lljson_parse_object(lljson_context* c, lljson_value* v) {
 	size_t size = 0; // 记录对象中成员的个数
 	int ret; // 记录解析结果
 	lljson_object_member m; // 临时存储解析出的成员
-	//printf("%s\n", c->json);
+	printf("%s\n", c->json);
 	EXPECT(c, '{');
 	lljson_parse_whitespace(c);
 	if (*c->json == '}') { // 正常结束
@@ -417,7 +417,7 @@ static int lljson_parse_object(lljson_context* c, lljson_value* v) {
 		if (*c->json == ',') {
 			c->json++; // 跳过逗号
 			lljson_parse_whitespace(c); // 处理空格
-		}else if ('}') { // 解析正常结束
+		}else if (*c->json == '}') { // 解析正常结束
 			c->json++;
 			v->type = LLJSON_OBJECT;
 			v->u.object.size = size;
@@ -426,6 +426,7 @@ static int lljson_parse_object(lljson_context* c, lljson_value* v) {
 			memcpy(v->u.object.m, lljson_context_pop(c, size), size);
 			return LLJSON_PARSE_OK;
 		}else { // 缺号逗号或者花括号
+			//printf("我运行了！\n");
 			ret = LLJSON_PARSE_MISS_COMMA_OR_CURLY_BRACKET;
 			break;
 		}
