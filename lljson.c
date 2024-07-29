@@ -629,6 +629,50 @@ lljson_type lljson_get_type(const lljson_value* v) {
 	return v->type;
 }
 
+// 判断两个lljson_value对象是否相等
+int lljson_is_equal(const lljson_value* lhs, const lljson_value* rhs) {
+	assert(lhs != NULL && rhs != NULL);
+	if (lhs->type != rhs->type)
+		return 0; // 不相等
+	if (lhs->type == LLJSON_NULL || lhs->type == LLJSON_TRUE || lhs->type == LLJSON_FALSE)
+		return 1;
+	switch (lhs->type) {
+		/*case LLJSON_NULL:
+			return rhs->type == LLJSON_NULL;
+		case LLJSON_TRUE:
+			return rhs->type == LLJSON_TRUE;
+		case LLJSON_FALSE:
+			return rhs->type == LLJSON_FALSE;*/
+		case LLJSON_STRING:
+			return lhs->u.string.len == rhs->u.string.len &&
+				memcmp(lhs->u.string.s, rhs->u.string.s, lhs->u.string.len) == 0;
+		case LLJSON_NUMBER:
+			return lhs->u.number == rhs->u.number;
+		case LLJSON_ARRAY:
+			if (lhs->u.array.size != rhs->u.array.size)
+				return 0;
+			for (size_t i = 0; i < lhs->u.array.size; i++) { // 循环递归判断两数组中每个元素是否相等
+				if (!lljson_is_equal(&lhs->u.array.e[i], &rhs->u.array.e[i]))
+					return 0;
+			}
+			return 1;
+		case LLJSON_OBJECT:
+			/* TODO */
+			if (lhs->u.object.size != rhs->u.object.size)
+				return 0;
+			for (size_t i = 0; i < lhs->u.object.size; i++) {
+				int index = lljson_find_object_index(rhs, lhs->u.object.m[i].key.k, lhs->u.object.m[i].key.len);
+				if (index == LLJSON_KEY_NOT_EXIST) // 先判断key
+					return 0;
+				if (!lljson_is_equal(&lhs->u.object.m[i].value, &rhs->u.object.m[index].value)) //再判断value
+					return 0;
+			}
+			return 1;
+		default: // 其他情况默认不相等
+			return 0;
+	}
+}
+
 // set null
 //void lljson_set_null(lljson_value* v) {
 //	lljson_free(v);

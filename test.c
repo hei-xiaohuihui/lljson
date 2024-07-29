@@ -478,7 +478,7 @@ static void test_stringify_object() {
 	TEST_ROUNDTRIP("{\"n\":null,\"f\":false,\"t\":true,\"i\":123,\"s\":\"abc\",\"a\":[1,2,3],\"o\":{\"1\":1,\"2\":2,\"3\":3}}");
 }
 
-// 生成器测试单元
+/* 生成器测试单元 */ 
 static void test_stringify() {
 	TEST_ROUNDTRIP("null");
 	TEST_ROUNDTRIP("true");
@@ -490,6 +490,46 @@ static void test_stringify() {
     test_stringify_object();
 }
 
+/*
+*	判断两个lljson_value是否相等
+*/
+#define TEST_EQUAL(json1, json2, equality) \
+	do { \
+		lljson_value v1, v2; \
+		v1.type = LLJSON_NULL; \
+		v2.type = LLJSON_NULL; \
+		EXPECT_EQ_INT(LLJSON_PARSE_OK, lljson_parse(&v1, json1)); \
+		EXPECT_EQ_INT(LLJSON_PARSE_OK, lljson_parse(&v2, json2)); \
+		EXPECT_EQ_INT(equality, lljson_is_equal(&v1, &v2)); \
+		lljson_free(&v1); \
+		lljson_free(&v2); \
+	} while(0)
+
+static test_equal() {
+	TEST_EQUAL("true", "true", 1);
+	TEST_EQUAL("true", "false", 0);
+	TEST_EQUAL("false", "false", 1);
+	TEST_EQUAL("null", "null", 1);
+	TEST_EQUAL("null", "0", 0);
+	TEST_EQUAL("123", "123", 1);
+	TEST_EQUAL("123", "456", 0);
+	TEST_EQUAL("\"abc\"", "\"abc\"", 1);
+	TEST_EQUAL("\"abc\"", "\"abcd\"", 0);
+	TEST_EQUAL("[]", "[]", 1);
+	TEST_EQUAL("[]", "null", 0);
+	TEST_EQUAL("[1,2,3]", "[1,2,3]", 1);
+	TEST_EQUAL("[1,2,3]", "[1,2,3,4]", 0);
+	TEST_EQUAL("[[]]", "[[]]", 1);
+	TEST_EQUAL("{}", "{}", 1);
+	TEST_EQUAL("{}", "null", 0);
+	TEST_EQUAL("{}", "[]", 0);
+	TEST_EQUAL("{\"a\":1,\"b\":2}", "{\"a\":1,\"b\":2}", 1);
+	TEST_EQUAL("{\"a\":1,\"b\":2}", "{\"b\":2,\"a\":1}", 1);
+	TEST_EQUAL("{\"a\":1,\"b\":2}", "{\"a\":1,\"b\":3}", 0);
+	TEST_EQUAL("{\"a\":1,\"b\":2}", "{\"a\":1,\"b\":2,\"c\":3}", 0);
+	TEST_EQUAL("{\"a\":{\"b\":{\"c\":{}}}}", "{\"a\":{\"b\":{\"c\":{}}}}", 1);
+	TEST_EQUAL("{\"a\":{\"b\":{\"c\":{}}}}", "{\"a\":{\"b\":{\"c\":[]}}}", 0);
+}
 
 // set null访问测试
 static void test_access_boolean() {
@@ -557,6 +597,7 @@ static void test_parse() {
 	test_parse_miss_colon();
 
 	test_stringify();
+	test_equal();
 }
 
 // 访问测试

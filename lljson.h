@@ -85,6 +85,8 @@ void lljson_free(lljson_value* v);
 int lljson_parse(lljson_value* v, const char* json);
 // 获取节点的json类型
 lljson_type lljson_get_type(const lljson_value* v);
+// 判断两个lljson_value是否相等
+int lljson_is_equal(const lljson_value* lhs, const lljson_value* rhs);
 
 // null
 #define lljson_set_null(v) lljson_free(v) // set_null于free操作基本相同，因此使用宏定义
