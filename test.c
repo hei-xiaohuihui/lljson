@@ -530,31 +530,31 @@ static void test_access_string() {
 
 // 合法/非法测试单元
 static void test_parse() {
-	//test_parse_null();
-	//test_parse_true();
-	//test_parse_false();
-	//test_parse_root_not_singular();
-	//test_parse_number(); // 合法数字测试
-	//test_parse_invalid_value(); // 不合法测试用例
-	//test_parse_number_too_big(); // 大数测试
-	//test_parse_expect_value(); // 缺少有效值测试单元
+	test_parse_null();
+	test_parse_true();
+	test_parse_false();
+	test_parse_root_not_singular();
+	test_parse_number(); // 合法数字测试
+	test_parse_invalid_value(); // 不合法测试用例
+	test_parse_number_too_big(); // 大数测试
+	test_parse_expect_value(); // 缺少有效值测试单元
 
-	//test_parse_string(); // 合法string类型测试
-	//test_parse_missing_quotation_mark(); // 缺引号单元测试
-	//test_parse_invalid_string_escape();
-	//test_parse_invalid_string_char();
+	test_parse_string(); // 合法string类型测试
+	test_parse_missing_quotation_mark(); // 缺引号单元测试
+	test_parse_invalid_string_escape();
+	test_parse_invalid_string_char();
 
-	//test_parse_invalid_unicode_hex(); // 非法十六进制表达测试
-	//test_parse_unicode_surrogate(); // 合法代理对测试
-	//test_parse_invalid_unicode_surrogate(); // 无效代理对测试
+	test_parse_invalid_unicode_hex(); // 非法十六进制表达测试
+	test_parse_unicode_surrogate(); // 合法代理对测试
+	test_parse_invalid_unicode_surrogate(); // 无效代理对测试
 
-	//test_parse_array(); // 解析数组
-	//test_parse_miss_comma_or_square_bracket();
-	//
-	//test_parse_object(); // 解析对象
-	//test_parse_miss_comma_or_curly_bracket();
-	//test_parse_miss_key();
-	//test_parse_miss_colon();
+	test_parse_array(); // 解析数组
+	test_parse_miss_comma_or_square_bracket();
+	
+	test_parse_object(); // 解析对象
+	test_parse_miss_comma_or_curly_bracket();
+	test_parse_miss_key();
+	test_parse_miss_colon();
 
 	test_stringify();
 }
