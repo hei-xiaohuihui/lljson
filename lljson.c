@@ -395,6 +395,7 @@ static int lljson_parse_object(lljson_context* c, lljson_value* v) {
 		m.key.len = sv.u.string.len;
 		m.key.k[m.key.len] = '\0';
 		/* 释放临时存储键key的sv */
+		//printf("%d\n", lljson_get_type(&sv));
 		lljson_free(&sv);
 		/* 处理空格 */
 		lljson_parse_whitespace(c);
@@ -435,8 +436,7 @@ static int lljson_parse_object(lljson_context* c, lljson_value* v) {
 	}
 	// 解析失败时释放内存
 	free(m.key.k); /* 遇到错误时，释放临时的key字符串 */
-	for (size_t i = 0; i < size; i++) {
-		/* TODO */
+	for (size_t i = 0; i < size; i++) { // 释放已入栈成员占用的内存
 		lljson_object_member* m = (lljson_object_member*)lljson_context_pop(c, sizeof(lljson_object_member));
 		free(m->key.k); // 释放member结构体中的指针指向的内存
 		lljson_free(&m->value); // 释放值
@@ -510,6 +510,7 @@ void lljson_free(lljson_value* v) {
 		case LLJSON_OBJECT:
 			for (size_t i = 0; i < v->u.object.size; i++) {
 				// object中的每个member可能又是一个object类型，所以递归释放
+				free(v->u.object.m[i].key.k);
 				lljson_free(&v->u.object.m[i].value);
 			}
 			free(v->u.object.m);

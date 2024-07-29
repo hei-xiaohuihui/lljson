@@ -301,11 +301,11 @@ static void test_parse_miss_comma_or_square_bracket() {
 static void test_parse_object() {
 	lljson_value v;
 
-	/*v.type = LLJSON_NULL;
+	v.type = LLJSON_NULL;
 	EXPECT_EQ_INT(LLJSON_PARSE_OK, lljson_parse(&v, " { } "));
 	EXPECT_EQ_INT(LLJSON_OBJECT, lljson_get_type(&v));
 	EXPECT_EQ_SIZE_T(0, lljson_get_object_size(&v));
-	lljson_free(&v);*/
+	lljson_free(&v);
 
 	v.type = LLJSON_NULL;
 	EXPECT_EQ_INT(LLJSON_PARSE_OK, lljson_parse(&v, 
@@ -320,61 +320,61 @@ static void test_parse_object() {
 	/*
 		{ "n" : null , "f" : false , "t" : true , "i" : 123 , "s" : "abc", "a" : [ 1, 2, 3 ],"o" : { "1" : 1, "2" : 2, "3" : 3 } }
 	*/
-	//v.type = LLJSON_NULL;
-	//EXPECT_EQ_INT(LLJSON_PARSE_OK, lljson_parse(&v, 
-	//	" { "
-	//		"\"n\" : null , "
-	//		"\"f\" : false , "
-	//		"\"t\" : true , "
-	//		"\"i\" : 123 , "
-	//		"\"s\" : \"abc\", "
-	//		"\"a\" : [ 1, 2, 3 ],"
-	//		"\"o\" : { \"1\" : 1, \"2\" : 2, \"3\" : 3 }"
-	//	" } "
-	//));
-	//EXPECT_EQ_INT(LLJSON_OBJECT, lljson_get_type(&v));
-	//EXPECT_EQ_SIZE_T(7, lljson_get_object_size(&v));
-	//// 第0个键值对 -> "n" : null
-	//EXPECT_EQ_STRING("n", lljson_get_object_key(&v, 0), lljson_get_object_key_length(&v, 0));
-	//EXPECT_EQ_INT(LLJSON_NULL,  lljson_get_type(lljson_get_object_value(&v, 0)));
-	//// 第1个键值对 -> "f" : false
-	//EXPECT_EQ_STRING("f", lljson_get_object_key(&v, 1), lljson_get_object_key_length(&v, 1));
-	//EXPECT_EQ_INT(LLJSON_FALSE, lljson_get_type(lljson_get_object_value(&v, 1)));
-	//// 第2个键值对 -> "t" : true
-	//EXPECT_EQ_STRING("t", lljson_get_object_key(&v, 2), lljson_get_object_key_length(&v, 2));
-	//EXPECT_EQ_INT(LLJSON_TRUE, lljson_get_type(lljson_get_object_value(&v, 2)));
-	//// 第3个键值对 -> "i" : 123
-	//EXPECT_EQ_STRING("i", lljson_get_object_key(&v, 3), lljson_get_object_key_length(&v, 3));
-	//EXPECT_EQ_INT(LLJSON_NUMBER, lljson_get_type(lljson_get_object_value(&v, 3)));
-	//EXPECT_EQ_DOUBLE(123.0, lljson_get_number(lljson_get_object_value(&v, 3)));
-	//// 第4个键值对 ->  "s" : "abc"
-	//EXPECT_EQ_STRING("s", lljson_get_object_key(&v, 4), lljson_get_object_key_length(&v, 4));
-	//EXPECT_EQ_INT(LLJSON_STRING, lljson_get_type(lljson_get_object_value(&v, 4)));
-	//EXPECT_EQ_STRING("abc", lljson_get_string(lljson_get_object_value(&v, 4)), lljson_get_string_length(lljson_get_object_value(&v, 4)));
-	//// 第5个键值对 -> "a" : [ 1, 2, 3 ]
-	//EXPECT_EQ_STRING("a", lljson_get_object_key(&v, 5), lljson_get_object_key_length(&v, 5));
-	//EXPECT_EQ_INT(LLJSON_ARRAY, lljson_get_type(lljson_get_object_value(&v, 5)));
-	//EXPECT_EQ_SIZE_T(3, lljson_get_array_size(lljson_get_object_value(&v, 5)));
-	//for (size_t i = 0; i < 3; i++) {
-	//	lljson_value* e = lljson_get_array_element(lljson_get_object_value(&v, 5), i);
-	//	EXPECT_EQ_INT(LLJSON_NUMBER, lljson_get_type(e));
-	//	EXPECT_EQ_DOUBLE(i + 1.0, lljson_get_number(e));
-	//}
-	//// 第6个键值对 -> "o" : { "1" : 1, "2" : 2, "3" : 3 }
-	//EXPECT_EQ_STRING("o", lljson_get_object_key(&v, 6), lljson_get_object_key_length(&v, 6)); // key
-	//{
-	//	lljson_value* o = lljson_get_object_value(&v, 6); // 又是一个object类型
-	//	EXPECT_EQ_INT(LLJSON_OBJECT, lljson_get_type(o));
-	//	for (size_t i = 0; i < 3; i++) { // 循环3个键值对
-	//		// i + '1'得到字符类型，lljson_get_object_key(o, i)[0]加上[0]是因为其返回值为字符串类型
-	//		EXPECT_TRUE(i + '1' == lljson_get_object_key(o, i)[0]);
-	//		EXPECT_EQ_SIZE_T(1, lljson_get_object_key_length(o, i));
-	//		lljson_value* ov = lljson_get_object_value(o, i); // value
-	//		EXPECT_EQ_INT(LLJSON_NUMBER, lljson_get_type(ov));
-	//		EXPECT_EQ_DOUBLE(i + 1.0, lljson_get_number(ov));
-	//	}
-	//}
-	//lljson_free(&v);
+	v.type = LLJSON_NULL;
+	EXPECT_EQ_INT(LLJSON_PARSE_OK, lljson_parse(&v, 
+		" { "
+			"\"n\" : null , "
+			"\"f\" : false , "
+			"\"t\" : true , "
+			"\"i\" : 123 , "
+			"\"s\" : \"abc\", "
+			"\"a\" : [ 1, 2, 3 ],"
+			"\"o\" : { \"1\" : 1, \"2\" : 2, \"3\" : 3 }"
+		" } "
+	));
+	EXPECT_EQ_INT(LLJSON_OBJECT, lljson_get_type(&v));
+	EXPECT_EQ_SIZE_T(7, lljson_get_object_size(&v));
+	// 第0个键值对 -> "n" : null
+	EXPECT_EQ_STRING("n", lljson_get_object_key(&v, 0), lljson_get_object_key_length(&v, 0));
+	EXPECT_EQ_INT(LLJSON_NULL,  lljson_get_type(lljson_get_object_value(&v, 0)));
+	// 第1个键值对 -> "f" : false
+	EXPECT_EQ_STRING("f", lljson_get_object_key(&v, 1), lljson_get_object_key_length(&v, 1));
+	EXPECT_EQ_INT(LLJSON_FALSE, lljson_get_type(lljson_get_object_value(&v, 1)));
+	// 第2个键值对 -> "t" : true
+	EXPECT_EQ_STRING("t", lljson_get_object_key(&v, 2), lljson_get_object_key_length(&v, 2));
+	EXPECT_EQ_INT(LLJSON_TRUE, lljson_get_type(lljson_get_object_value(&v, 2)));
+	// 第3个键值对 -> "i" : 123
+	EXPECT_EQ_STRING("i", lljson_get_object_key(&v, 3), lljson_get_object_key_length(&v, 3));
+	EXPECT_EQ_INT(LLJSON_NUMBER, lljson_get_type(lljson_get_object_value(&v, 3)));
+	EXPECT_EQ_DOUBLE(123.0, lljson_get_number(lljson_get_object_value(&v, 3)));
+	// 第4个键值对 ->  "s" : "abc"
+	EXPECT_EQ_STRING("s", lljson_get_object_key(&v, 4), lljson_get_object_key_length(&v, 4));
+	EXPECT_EQ_INT(LLJSON_STRING, lljson_get_type(lljson_get_object_value(&v, 4)));
+	EXPECT_EQ_STRING("abc", lljson_get_string(lljson_get_object_value(&v, 4)), lljson_get_string_length(lljson_get_object_value(&v, 4)));
+	// 第5个键值对 -> "a" : [ 1, 2, 3 ]
+	EXPECT_EQ_STRING("a", lljson_get_object_key(&v, 5), lljson_get_object_key_length(&v, 5));
+	EXPECT_EQ_INT(LLJSON_ARRAY, lljson_get_type(lljson_get_object_value(&v, 5)));
+	EXPECT_EQ_SIZE_T(3, lljson_get_array_size(lljson_get_object_value(&v, 5)));
+	for (size_t i = 0; i < 3; i++) {
+		lljson_value* e = lljson_get_array_element(lljson_get_object_value(&v, 5), i);
+		EXPECT_EQ_INT(LLJSON_NUMBER, lljson_get_type(e));
+		EXPECT_EQ_DOUBLE(i + 1.0, lljson_get_number(e));
+	}
+	// 第6个键值对 -> "o" : { "1" : 1, "2" : 2, "3" : 3 }
+	EXPECT_EQ_STRING("o", lljson_get_object_key(&v, 6), lljson_get_object_key_length(&v, 6)); // key
+	{
+		lljson_value* o = lljson_get_object_value(&v, 6); // 又是一个object类型
+		EXPECT_EQ_INT(LLJSON_OBJECT, lljson_get_type(o));
+		for (size_t i = 0; i < 3; i++) { // 循环3个键值对
+			// i + '1'得到字符类型，lljson_get_object_key(o, i)[0]加上[0]是因为其返回值为字符串类型
+			EXPECT_TRUE(i + '1' == lljson_get_object_key(o, i)[0]);
+			EXPECT_EQ_SIZE_T(1, lljson_get_object_key_length(o, i));
+			lljson_value* ov = lljson_get_object_value(o, i); // value
+			EXPECT_EQ_INT(LLJSON_NUMBER, lljson_get_type(ov));
+			EXPECT_EQ_DOUBLE(i + 1.0, lljson_get_number(ov));
+		}
+	}
+	lljson_free(&v);
 }
 
 // 缺少逗号或花括号（对象）测试单元
@@ -456,31 +456,31 @@ static void test_access_string() {
 
 // 合法/非法测试单元
 static void test_parse() {
-	//test_parse_null();
-	//test_parse_true();
-	//test_parse_false();
-	//test_parse_root_not_singular();
-	//test_parse_number(); // 合法数字测试
-	//test_parse_invalid_value(); // 不合法测试用例
-	//test_parse_number_too_big(); // 大数测试
-	//test_parse_expect_value(); // 缺少有效值测试单元
+	test_parse_null();
+	test_parse_true();
+	test_parse_false();
+	test_parse_root_not_singular();
+	test_parse_number(); // 合法数字测试
+	test_parse_invalid_value(); // 不合法测试用例
+	test_parse_number_too_big(); // 大数测试
+	test_parse_expect_value(); // 缺少有效值测试单元
 
-	//test_parse_string(); // 合法string类型测试
-	//test_parse_missing_quotation_mark(); // 缺引号单元测试
-	//test_parse_invalid_string_escape();
-	//test_parse_invalid_string_char();
+	test_parse_string(); // 合法string类型测试
+	test_parse_missing_quotation_mark(); // 缺引号单元测试
+	test_parse_invalid_string_escape();
+	test_parse_invalid_string_char();
 
-	//test_parse_invalid_unicode_hex(); // 非法十六进制表达测试
-	//test_parse_unicode_surrogate(); // 合法代理对测试
-	//test_parse_invalid_unicode_surrogate(); // 无效代理对测试
+	test_parse_invalid_unicode_hex(); // 非法十六进制表达测试
+	test_parse_unicode_surrogate(); // 合法代理对测试
+	test_parse_invalid_unicode_surrogate(); // 无效代理对测试
 
-	//test_parse_array(); // 解析数组
-	//test_parse_miss_comma_or_square_bracket();
+	test_parse_array(); // 解析数组
+	test_parse_miss_comma_or_square_bracket();
 	
 	test_parse_object(); // 解析对象
-	/*test_parse_miss_comma_or_curly_bracket();
+	test_parse_miss_comma_or_curly_bracket();
 	test_parse_miss_key();
-	test_parse_miss_colon();*/
+	test_parse_miss_colon();
 }
 
 // 访问测试
