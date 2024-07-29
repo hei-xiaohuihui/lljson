@@ -21,8 +21,12 @@
 #define ISDIGIT1TO9(ch) (ch >= '1' && ch <= '9')
 // 堆栈的初始化大小
 #define STACK_INIT_SIZE 256
-// 入栈操作宏定义
+// 字符串化时初始化堆栈的大小
+#define STRINGIFY_STACK_INIT_SIZE 256
+// 字符入栈操作宏定义
 #define PUTC(c, ch) do { *(char*)lljson_context_push(c, sizeof(char)) = ch; } while(0)
+// 字符串入栈操作宏定义
+#define PUTS(c, s, len) { memcpy(lljson_context_push(c, len), s, len); }
 
 // 为了减少解析函数之间传递多个参数，将数据都放入结构体lljson_context中
 typedef struct {
@@ -463,7 +467,8 @@ static int lljson_parse_value(lljson_context* c, lljson_value* v) {
 	}
 }
 
-// JSON解析函数
+// JSON解析器/解析函数
+// JSON解析器将JSON文本解析成一个树形数据结构，整个结构以lljson_value为节点组成
 int lljson_parse(lljson_value* v, const char* json) {
 	assert(v != NULL); // 节点不能为空
 	int ret; 
@@ -491,6 +496,101 @@ int lljson_parse(lljson_value* v, const char* json) {
 	// 注意记得释放堆栈指向的内存空间
 	free(c.stack);
 	return ret;
+}
+
+// 将string类型字符串化
+static void lljson_stringify_string(lljson_context*c, const char* s,size_t len) {
+	/* TODO */
+	assert(s != NULL);
+	PUTC(c, '"'); // 添加左双引号
+	for (size_t i = 0; i < len; i++) { // 遍历字符串中的每个字符进行判断
+		char ch = s[i];
+		switch (ch) {
+		case '\"': PUTS(c, "\\\"", 2); break;
+			case '\\': PUTS(c, "\\\\", 2); break;
+			case '\b': PUTS(c, "\\b", 2); break; // 退格符
+			case '\f': PUTS(c, "\\f", 2); break; // 换页符
+			case '\r': PUTS(c, "\\r", 2); break; // 回车符
+			case '\t': PUTS(c, "\\t", 2); break; // 制表符
+			case '\n': PUTS(c, "\\n", 2); break; // 换行符
+			default: // 其他情况
+				// 控制字符不适合直接在JSON字符串中显示，因此需要转义
+				if (ch < 0x20) { // 判断是否是控制字符
+					// 例如 \u001F长度为6，'\'和'u'长度均为1，001F长度为4，结尾还有'\0'，因此buffer大小设置为7字节
+					char buffer[7];
+					// %04X指定了将整数'ch'转换为至少4位宽的十六进制数，并使用大写字母表示
+					sprintf(buffer, "\\u%04X", ch);
+					PUTS(c, buffer, 6);
+				}else // 合法的单字符直接入栈
+					PUTC(c, ch);
+		}
+	}
+	PUTC(c, '"'); // 添加右双引号
+}
+
+// 根据节点lljson_value的类型将其字符串化
+static void lljson_stringify_value(lljson_context* c, const lljson_value* v) {
+	/* TODO */
+	switch (v->type) {
+		case LLJSON_NULL: PUTS(c, "null", 4); break;
+		case LLJSON_TRUE: PUTS(c, "true", 4); break;
+		case LLJSON_FALSE: PUTS(c, "false", 5); break;
+		case LLJSON_NUMBER: 
+			{
+				// 将数字转换为字符串后入栈
+				char buffer[32];
+				int length = sprintf(buffer, "%.17g", v->u.number);
+				PUTS(c, buffer, length);
+			}
+			break;
+		case LLJSON_STRING: 
+			lljson_stringify_string(c, v->u.string.s, v->u.string.len);
+			break;
+		case LLJSON_ARRAY: 
+			PUTC(c, '['); // 左括号
+			for (size_t i = 0; i < v->u.array.size; i++) {
+				if (i > 0) //添加逗号
+					PUTC(c, ',');
+				// 因为数组中的元素可能是任意合法JSON类型，因此递归调用lljson_stringify_value函数来生成字符串
+				lljson_stringify_value(c, &v->u.array.e[i]);
+			}
+			PUTC(c, ']'); // 右括号
+			break;
+		case LLJSON_OBJECT: 
+			/* TODO */
+			PUTC(c, '{'); // 左括号
+			for (size_t i = 0; i < v->u.object.size; i++) {
+				if (i > 0)
+					PUTC(c, ',');
+				// 对象object类型中每个成员是以键值对的形式存在
+				// 先解析键key（一定是字符串类型）生成字符串
+				lljson_stringify_string(c, v->u.object.m[i].key.k, v->u.object.m[i].key.len);
+				// 添加冒号
+				PUTC(c, ':');
+				// 再解析值value（可以为任意合法JSON类型）生成字符串
+				lljson_stringify_value(c, &v->u.object.m[i].value);
+			}
+			PUTC(c, '}'); // 右括号
+			break;
+		default:
+			assert(0 && "invalid type"); // 其他情况触发断言，并打印"invalid type"
+	}
+}
+
+// JSON生成器
+// JSON生成器将JSON解析器解析得到的树形结构转换成JSON文本（字符串化）
+char* lljson_stringify(const lljson_value* v, size_t* length) {
+	/* TODO */
+	assert(v != NULL);
+	lljson_context c;
+	// 初始化栈内存空间
+	c.stack = (char*)malloc(c.size = STRINGIFY_STACK_INIT_SIZE);
+	c.top = 0;
+	lljson_stringify_value(&c, v);
+	if (length) // 传入的length不为NULL，则用起记录JSON字符串的长度
+		*length = c.top;
+	PUTC(&c, '\0'); // 末尾补上结束符
+	return c.stack; // 返回序列化后的JSON字符串
 }
 
 void lljson_free(lljson_value* v) {

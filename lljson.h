@@ -69,6 +69,10 @@ enum {
 	LLJSON_PARSE_MISS_COMMA_OR_CURLY_BRACKET // 缺少逗号或花括号（对象）
 };
 
+// JSON生成器 -> 将树形数据结构转换成JSON文本
+// length参数是可选的，它会存储JSON的长度，传入NULL可忽略此参数
+char* lljson_stringify(const lljson_value* v, size_t* length);
+
 // 释放lljson_value*类型指向的内存空间
 void lljson_free(lljson_value* v);
 
