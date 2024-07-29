@@ -736,3 +736,21 @@ lljson_value* lljson_get_object_value(const lljson_value* v, size_t index) {
 	assert(v != NULL && v->type == LLJSON_OBJECT && index < v->u.object.size);
 	return &v->u.object.m[index].value;
 }
+
+// 根据key查询键值对在object中的索引下标
+size_t lljson_find_object_index(const lljson_value* v, const char* k, size_t len) {
+	assert(v != NULL && v->type == LLJSON_OBJECT && k != NULL);
+	for (size_t i = 0; i < v->u.object.size; i++) {
+		if (len == v->u.object.m[i].key.len && memcmp(k, v->u.object.m[i].key.k, len) == 0)
+			return i; // 成功找到，返回下标
+	}
+	return LLJSON_KEY_NOT_EXIST; // 不存在时
+}
+
+// 根据键key获取其对应的值value
+lljson_value* lljson_find_object_value(const lljson_value* v, const char* k, size_t len) {
+	size_t index = lljson_find_object_index(v, k, len);
+	//lljson_get_object_value(v, index);
+	//return &lljson_get_object_value(v, index)->u.object.m->value;
+	return index != LLJSON_KEY_NOT_EXIST ? &v->u.object.m[index].value : NULL;
+}

@@ -5,6 +5,8 @@
 
 // c语言中枚举值用全大写，而类型和函数用小写
 
+#include <stddef.h> /* size_t */
+
 // JSON中有空值 boolean值（这里分为true和false） 数值 字符串 数组 对象6中数据类型
 // 为json中的数据类型定义一个枚举类
 typedef enum {	
@@ -16,6 +18,9 @@ typedef enum {
 	LLJSON_ARRAY = 5, 
 	LLJSON_OBJECT = 6
 } lljson_type;
+
+// (size_t)-1将得到size_t类型的最大值
+#define LLJSON_KEY_NOT_EXIST ((size_t)-1)
 
 // JSON字符串是一个树形结构，使用结构体lljson_value定义该树的节点
 // 因为lljson_value中使用了自身类型的指针，所以必须前向声明此类型
@@ -107,6 +112,10 @@ size_t lljson_get_object_size(const lljson_value* v); // get对象中的成员�
 const char* lljson_get_object_key(const lljson_value* v, size_t index); // get key
 size_t lljson_get_object_key_length(const lljson_value* v, size_t index); // get key's length
 lljson_value* lljson_get_object_value(const lljson_value* v, size_t index); // get value
+// 根据键key查询一个键值对是否存在，存在返回其在object中的下标
+size_t lljson_find_object_index(const lljson_value* v, const char* k, size_t len);
+// 根据key获取其对应的值value
+lljson_value* lljson_find_object_value(const lljson_value* v, const char* k, size_t len);
 
 #endif
 
