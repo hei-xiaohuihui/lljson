@@ -29,10 +29,10 @@ typedef struct lljson_object_member lljson_object_member;
 struct lljson_value{
 	/* 一个值不可能同时为数字、字符串或数组，因此使用union来节省内存 */
 	union {
-		// size是对象中的成员个数
-		struct { lljson_object_member* m; size_t size; }object; /* object */
-		// size是数组中元素的个数
-		struct { lljson_value* e; size_t size; }array; /* array */
+		// size是对象中的成员个数，capacity是对象的容量
+		struct { lljson_object_member* m; size_t size, capacity; }object; /* object */
+		// size是数组中实际元素的个数，capacity是数组的最大容量
+		struct { lljson_value* e; size_t size, capacity; }array; /* array */
 		// len是字符串的长度
 		struct { char* s; size_t len; }string; /* string */
 		double number; /* number */
@@ -78,6 +78,14 @@ enum {
 // length参数是可选的，它会存储JSON的长度，传入NULL可忽略此参数
 char* lljson_stringify(const lljson_value* v, size_t* length);
 
+// 复制/移动/交换操作
+// 深度复制：把value整个复制一份出来修改，原来的保持不变
+void lljson_copy(lljson_value* dst, const lljson_value* src);
+// 移动语义：把value的拥有权转移至新增的键值对，再把原来的value设置为null
+void lljson_move(lljson_value* dst, lljson_value* src);
+// 交换值
+void lljson_swap(lljson_value* lhs, lljson_value* rhs);
+
 // 释放lljson_value*类型指向的内存空间
 void lljson_free(lljson_value* v);
 
@@ -105,11 +113,23 @@ void lljson_set_boolean(lljson_value* v, int b); // set布尔值
 int lljson_get_boolean(const lljson_value* v); // get布尔值
 
 // array类型
-size_t lljson_get_array_size(const lljson_value* v); // get 数组大小
+void lljson_set_array(lljson_value* v, size_t capacity); // 将一个lljson_value对象初始化为数组类型，设置其初始容量
+size_t lljson_get_array_size(const lljson_value* v); // get 数组中元素的个数
+size_t lljson_get_array_capacity(const lljson_value* v);// get 数组的容量
+void lljson_reserve_array(lljson_value* v, size_t capacity); // 扩容
+void lljson_shrink_array(lljson_value* v); // 数组不需要在修改时，将容量缩小至size
+void lljson_clear_array(lljson_value* v); // 清空数组中的所有元素（不改变容量）
 lljson_value* lljson_get_array_element(const lljson_value* v, size_t index); // 获取数组下标index处的元素
+lljson_value* lljson_pushback_array_element(lljson_value* v); // 在末尾插入一个元素
+void lljson_popback_array_element(lljson_value* v); // 将末尾元素删除
+lljson_value* lljson_insert_array_element(lljson_value* v, size_t index); // 在下标index处插入一个元素
+void lljson_erase_array_element(lljson_value* v, size_t index, size_t count); // 删除从下标index开始的count个元素
 
 // object类型 - > 一种无序的键值对集合，以{开始，}结束，键与值之间使用:分割
+void lljson_set_object(lljson_value* v, size_t capacity);
 size_t lljson_get_object_size(const lljson_value* v); // get对象中的成员个数
+size_t lljson_get_object_capacity(const lljson_value* v); // get对象的容量
+void lljson_reserve_object(lljson_value* v, size_t capacity); // object容量不足时，为其增加容量
 // object类型的键key必须是字符串类型，而值可以是JSON中的任意类型
 const char* lljson_get_object_key(const lljson_value* v, size_t index); // get key
 size_t lljson_get_object_key_length(const lljson_value* v, size_t index); // get key's length
@@ -118,6 +138,8 @@ lljson_value* lljson_get_object_value(const lljson_value* v, size_t index); // g
 size_t lljson_find_object_index(const lljson_value* v, const char* k, size_t len);
 // 根据key获取其对应的值value
 lljson_value* lljson_find_object_value(const lljson_value* v, const char* k, size_t len);
+// set value
+lljson_value* lljson_set_object_value(lljson_value* v, const char* k, size_t len);
 
 #endif
 

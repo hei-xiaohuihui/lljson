@@ -593,6 +593,58 @@ char* lljson_stringify(const lljson_value* v, size_t* length) {
 	return c.stack; // 返回序列化后的JSON字符串
 }
 
+// 深度复制
+void lljson_copy(lljson_value* dst, const lljson_value* src) {
+	assert(dst != NULL && src != NULL && dst != src);
+	switch (src->type) {
+		case LLJSON_STRING:
+			lljson_set_string(dst, src->u.string.s, src->u.string.len);
+			break;
+		case LLJSON_ARRAY:
+			lljson_set_array(dst, src->u.array.size);
+			for (size_t i = 0; i < src->u.array.size; i++) {
+				// 递归copy
+				lljson_copy(&dst->u.array.e[i], &src->u.array.e[i]);
+			}
+			dst->u.array.size = src->u.array.size;
+			break;
+		case LLJSON_OBJECT:
+			/* TODO */
+			lljson_set_object(dst, src->u.object.size);
+			for (size_t i = 0; i < src->u.object.size; i++) {
+				// key
+				lljson_value* val = lljson_set_object_value(dst, src->u.object.m[i].key.k, src->u.object.m[i].key.len);
+				// value
+				lljson_copy(val, &src->u.object.m[i].value);
+			}
+			dst->u.object.size = src->u.object.size;
+			break;
+		default: // 其他类型直接进行拷贝
+			lljson_free(dst);
+			memcpy(dst, src, sizeof(lljson_value));
+			break;
+	}
+}
+
+// 移动语义：将value的拥有权转移至新增的键值对，再把原来的value设置为null
+void lljson_move(lljson_value* dst, lljson_value* src) {
+	assert(dst != NULL && src != NULL && dst != src);
+	lljson_free(dst);
+	memcpy(dst, src, sizeof(lljson_value));
+	src->type = LLJSON_NULL;
+}
+
+// 交换值
+void lljson_swap(lljson_value* lhs, lljson_value* rhs) {
+	assert(lhs != NULL && rhs != NULL);
+	if (lhs != rhs) {
+		lljson_value tmp;
+		memcpy(&tmp, lhs, sizeof(lljson_value));
+		memcpy(lhs, rhs, sizeof(lljson_value));
+		memcpy(rhs, &tmp, sizeof(lljson_value));
+	}
+}
+
 void lljson_free(lljson_value* v) {
 	assert(v != NULL);
 	/*if (v->type == LLJSON_STRING)
@@ -744,10 +796,54 @@ int lljson_get_boolean(const lljson_value* v) {
 	return v->type == LLJSON_TRUE; // 将boolean类型的返回值转换位0或1
 }
 
-// get数组大小
+// 将lljson_value对象初始化为数组类型，并设置其初始容量
+void lljson_set_array(lljson_value* v, size_t capacity) {
+	assert(v != NULL);
+	lljson_free(v);
+	v->type = LLJSON_ARRAY;
+	v->u.array.size = 0;
+	v->u.array.capacity = capacity;
+	v->u.array.e = capacity > 0 ? (lljson_value*)malloc(capacity * sizeof(lljson_value)) : NULL;
+}
+
+// get数组中元素个数
 size_t lljson_get_array_size(const lljson_value* v) {
 	assert(v != NULL && v->type == LLJSON_ARRAY);
 	return v->u.array.size;
+}
+
+// get数组容量
+size_t lljson_get_array_capacity(const lljson_value* v) {
+	assert(v != NULL && v->type == LLJSON_ARRAY);
+	return v->u.array.capacity;
+}
+
+// 扩容
+void lljson_reserve_array(lljson_value* v, size_t capacity) {
+	assert(v != NULL && v->type == LLJSON_ARRAY);
+	if (v->u.array.capacity < capacity) {
+		v->u.array.e = (lljson_value*)realloc(v->u.array.e, capacity * sizeof(lljson_value));
+		v->u.array.capacity = capacity;
+	}
+}
+
+// 容量缩至size
+void lljson_shrink_array(lljson_value* v) {
+	assert(v != NULL && v->type == LLJSON_ARRAY);
+	size_t size = v->u.array.size;
+	if (v->u.array.capacity > size) {
+		v->u.array.e = (lljson_value*)realloc(v->u.array.e, size * sizeof(lljson_value));
+		v->u.array.capacity = size;
+	}
+}
+
+// 清空数组（容量不变）
+void lljson_clear_array(lljson_value* v) {
+	assert(v != NULL && v->type == LLJSON_ARRAY);
+	for (size_t i = 0; i < v->u.array.size; i++) {
+		lljson_free(&v->u.array.e[i]);
+	}
+	v->u.array.size = 0;
 }
 
 // get数组中下标index处的元素
@@ -756,11 +852,63 @@ lljson_value* lljson_get_array_element(const lljson_value* v, size_t index) {
 	return &v->u.array.e[index];
 }
 
+// 在数组末尾插入一个元素
+lljson_value* lljson_pushback_array_element(lljson_value* v) {
+	assert(v != NULL && v->type == LLJSON_ARRAY);
+	if (v->u.array.size == v->u.array.capacity) {
+		lljson_reserve_array(v, v->u.array.capacity == 0 ? 1 : (v->u.array.capacity << 1));
+	}
+	v->u.array.e[v->u.array.size].type = LLJSON_NULL;
+	return &v->u.array.e[v->u.array.size++];
+}
+
+// 删除数组末尾元素
+void lljson_popback_array_element(lljson_value* v) {
+	assert(v != NULL && v->type == LLJSON_ARRAY && v->u.array.size > 0);
+	/*lljson_free(&v->u.array.e[v->u.array.size - 1]);
+	v->u.array.size--;*/
+	lljson_free(&v->u.array.e[--v->u.array.size]);
+}
+
+// 在index处插入元素
+lljson_value* lljson_insert_array_element(lljson_value* v, size_t index) {
+
+}
+
+// 删除从index处开始的count个元素
+void lljson_erase_array_element(lljson_value* v, size_t index, size_t count) {
+
+}
+
+// 将lljson_value设置为object类型，并设置其初始容量
+void lljson_set_object(lljson_value* v, size_t capacity) {
+	assert(v != NULL);
+	v->type = LLJSON_OBJECT;
+	v->u.object.size = 0;
+	v->u.object.capacity = capacity;
+	v->u.object.m = capacity > 0 ? (lljson_object_member*)malloc(capacity * sizeof(lljson_object_member)) : NULL;
+}
+
 // get对象中的成员个数
-size_t lljson_get_object_size(const lljson_value* v)
-{
+size_t lljson_get_object_size(const lljson_value* v) {
 	assert(v != NULL && v->type == LLJSON_OBJECT);
 	return v->u.object.size;
+}
+
+// get对象的容量大小
+size_t lljson_get_object_capacity(const lljson_value* v) {
+	assert(v != NULL && v->type == LLJSON_OBJECT);
+	return v->u.object.capacity;
+}
+
+// 增加object容量
+void lljson_reserve_object(lljson_value* v, size_t capacity) {
+	assert(v != NULL && v->type == LLJSON_OBJECT);
+	if (v->u.object.capacity < capacity) {
+		// 使用realloc重新为object分配内存空间，以增加其最大容量
+		v->u.object.m = (lljson_object_member*)realloc(v->u.object.m, capacity * sizeof(lljson_object_member));
+		v->u.object.capacity = capacity;
+	}
 }
 
 // get对象中下标index处成员的键key -> 字符串类型
@@ -797,4 +945,26 @@ lljson_value* lljson_find_object_value(const lljson_value* v, const char* k, siz
 	//lljson_get_object_value(v, index);
 	//return &lljson_get_object_value(v, index)->u.object.m->value;
 	return index != LLJSON_KEY_NOT_EXIST ? &v->u.object.m[index].value : NULL;
+}
+
+// 设置键值对
+lljson_value* lljson_set_object_value(lljson_value* v, const char* k, size_t len) {
+	assert(v != NULL && v->type == LLJSON_OBJECT && k != NULL);
+	/* TODO */
+	// 先根据key查找键值对是否已存在，存在直接返回键key对应的value
+	size_t index = lljson_find_object_index(v, k, len);
+	if (index != LLJSON_KEY_NOT_EXIST)
+		return &v->u.object.m->value;
+	// key不存在，创建新的键值对
+	if (v->u.object.size == v->u.object.capacity) { // 容量不足以创建新的键值对
+		lljson_reserve_object(v, v->u.object.capacity == 0 ? 1 : (v->u.object.capacity << 1)); // 扩容
+	}
+	size_t size = v->u.object.size;
+	v->u.object.m[size].key.k = (char*)malloc(len + 1);
+	memcpy(v->u.object.m[size].key.k, k, len);
+	v->u.object.m[size].key.k[len] = '\0';
+	v->u.object.m[size].key.len = len;
+	v->u.object.m[size].value.type = LLJSON_NULL;
+	v->u.object.size++;
+	return &v->u.object.m[size].value;
 }
